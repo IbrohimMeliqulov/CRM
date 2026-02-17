@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/core/databases/prisma.service';
-import { CreateStudent } from './dto/createStudent.dto';
+import { CreateStudent, UpdateStudent } from './dto/createStudent.dto';
 import { hashPassword } from 'src/core/utils/bcrypt';
 import { Status } from '@prisma/client';
 
@@ -69,6 +69,49 @@ export class StudentsService {
         return {
             success: true,
             message: "Student created"
+        }
+    }
+
+
+    async getOneStudent(id: number) {
+        const student = await this.prisma.student.findUnique({
+            where: {
+                id
+            }
+        })
+
+        return {
+            success: true,
+            data: student
+        }
+    }
+
+
+
+
+
+    async updateStudent(id: number, payload: UpdateStudent, filename: string) {
+        const { password, ...rest } = payload
+        await this.prisma.student.update({
+            where: { id: id }, data: {
+                ...rest,
+                ...(password && { password: await hashPassword(password) }),
+                ...(filename && { photo: filename })
+            }
+        })
+
+        return {
+            success: true,
+            message: "Student updated"
+        }
+    }
+
+
+    async deleteStudent(id: number) {
+        await this.prisma.student.update({ where: { id }, data: { status: Status.inactive } })
+        return {
+            success: true,
+            message: "Student inactivated"
         }
     }
 }

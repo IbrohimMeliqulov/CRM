@@ -12,7 +12,11 @@ async function bootstrap() {
     .build()
 
   const documentFactory = () => SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup("swagger", app, documentFactory)
+  SwaggerModule.setup("swagger", app, documentFactory, {
+    swaggerOptions: {
+      persistAuthorization: true
+    }
+  })
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true
   }))
