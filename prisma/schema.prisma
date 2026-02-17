@@ -6,21 +6,40 @@ datasource db {
   provider = "postgresql"
 }
 
-enum StaffRole {
-  superadmin
-  admin
-  teacher
+enum CourseLevel {
+  beginner
+  intermediate
+  advanced
 }
 
-enum StaffStatus {
-  active
-  inactive
+enum Role {
+  SUPERADMIN
+  ADMIN
+  TEACHER
+  STUDENT
 }
 
 enum StudentStatus {
   active
   inactive
+  freeze
   graduated
+}
+
+enum WeekDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum Status {
+  active
+  inactive
+  freeze
 }
 
 enum GroupStatus {
@@ -29,219 +48,104 @@ enum GroupStatus {
   completed
 }
 
-enum StudentGroupStatus {
-  active
-  inactive
-  completed
-}
-
-enum AttendanceStatus {
-  present
-  absent
-  late
-}
-
-enum PaymentMethod {
-  cash
-  card
-  transfer
-}
-
-enum CourseLevel {
-  beginner
-  intermediate
-  advanced
-}
-
-enum WeekDay {
-  Monday
-  Tuesday
-  Wednesday
-  Thursday
-  Friday
-  Saturday
-  Sunday
-}
-
-model Staff {
-  id        Int         @id @default(autoincrement())
-  firstname String
-  lastname  String
-  password  String
-  role      StaffRole
-  position  String
-  phone     String      @unique
-  email     String      @unique
-  address   String?
-  status    StaffStatus @default(active)
-  photo     String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @default(now())
-  groups    Group[]
-  lessons   Lesson[]    @relation("LessonCreatedBy")
-  payments  Payment[]
-
-  @@map("staffs")
+model User {
+  id         Int      @id @default(autoincrement())
+  first_name String
+  last_name  String
+  password   String
+  role       Role
+  phone      String   @unique
+  email      String   @unique
+  address    String
+  photo      String?
+  status     Status   @default(active)
+  created_at DateTime @default(now())
+  update_at  DateTime @default(now())
 }
 
 model Student {
-  id             Int           @id @default(autoincrement())
-  firstName      String        @map("first_name")
-  lastName       String        @map("last_name")
-  username       String?       @unique
-  password       String?
-  phone          String?       @unique
-  email          String        @unique
-  address        String?
-  photo          String?
-  birthDate      DateTime?     @map("birth_date")
-  status         StudentStatus @default(active)
-  enrollmentDate DateTime      @default(now()) @map("enrollment_date")
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now())
+  id            Int            @id @default(autoincrement())
+  first_name    String
+  last_name     String
+  password      String
+  phone         String         @unique
+  email         String         @unique
+  birth_date    DateTime
+  address       String
+  photo         String?
+  status        StudentStatus  @default(active)
+  created_at    DateTime       @default(now())
+  update_at     DateTime       @default(now())
+  studentGroups StudentGroup[]
+}
 
-  groups     StudentGroup[]
-  attendance AttendanceDetail[]
-  payments   Payment[]
-
-  @@map("students")
+model Teacher {
+  id         Int      @id @default(autoincrement())
+  first_name String
+  last_name  String
+  password   String
+  phone      String   @unique
+  email      String   @unique
+  address    String
+  photo      String?
+  status     Status   @default(active)
+  created_at DateTime @default(now())
+  update_at  DateTime @default(now())
+  groups     Group[]
 }
 
 model Course {
-  id          Int          @id @default(autoincrement())
-  name        String
-  description String?
-  price       Int
-  duration    Int
-  level       CourseLevel?
-  isActive    Boolean      @default(true) @map("is_active")
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  id             Int         @id @default(autoincrement())
+  name           String      @unique
+  description    String?
+  price          Decimal
+  duration_month Int
+  duration_hours Int
+  level          CourseLevel
+  status         Status      @default(active)
+  created_at     DateTime    @default(now())
+  update_at      DateTime    @default(now())
 
   groups Group[]
+}
 
-  @@map("courses")
+model Room {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  created_at DateTime @default(now())
+  update_at  DateTime @default(now())
+  groups     Group[]
 }
 
 model Group {
   id          Int         @id @default(autoincrement())
-  name        String
-  courseId    Int?        @map("course_id")
-  teacherId   Int?        @map("teacher_id")
-  startDate   DateTime    @map("start_date")
-  endDate     DateTime?   @map("end_date")
-  schedule    String?
-  maxStudents Int         @default(20) @map("max_students")
-  status      GroupStatus @default(planned)
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  name        String      @unique
+  description String?
+  course_id   Int
+  teacher_id  Int
+  room_id     Int
+  start_date  DateTime
+  week_day    Json
+  start_time  String
+  max_student Int
+  status      GroupStatus @default(active)
+  created_at  DateTime    @default(now())
+  update_at   DateTime    @default(now())
 
-  course  Course? @relation(fields: [courseId], references: [id])
-  teacher Staff?  @relation(fields: [teacherId], references: [id])
-
-  students  StudentGroup[]
-  lessons   Lesson[]
-  payments  Payment[]
-  schedules Schedule[]
-
-  @@map("groups")
+  courses       Course         @relation(fields: [course_id], references: [id])
+  teachers      Teacher        @relation(fields: [teacher_id], references: [id])
+  rooms         Room           @relation(fields: [room_id], references: [id])
+  studentGroups StudentGroup[]
 }
 
 model StudentGroup {
-  id        Int                @id @default(autoincrement())
-  studentId Int                @map("student_id")
-  groupId   Int                @map("group_id")
-  joinDate  DateTime           @default(now()) @map("join_date")
-  status    StudentGroupStatus @default(active)
-  createdAt DateTime           @default(now()) @map("created_at")
-  updatedAt DateTime           @updatedAt @map("updated_at")
-
-  student Student @relation(fields: [studentId], references: [id])
-  group   Group   @relation(fields: [groupId], references: [id])
-
-  @@unique([studentId, groupId])
-  @@map("student_groups")
-}
-
-model Lesson {
-  id          Int      @id @default(autoincrement())
-  groupId     Int?     @map("group_id")
-  title       String?
-  description String?
-  lessonDate  DateTime @map("lesson_date")
-  startTime   DateTime @map("start_time")
-  endTime     DateTime @map("end_time")
-  roomNumber  String?  @map("room_number")
-  createdBy   Int?     @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  group      Group?       @relation(fields: [groupId], references: [id])
-  creator    Staff?       @relation("LessonCreatedBy", fields: [createdBy], references: [id])
-  attendance Attendance[]
-
-  @@map("lessons")
-}
-
-model Attendance {
-  id        Int      @id @default(autoincrement())
-  lessonId  Int?     @map("lesson_id")
-  createdBy Int?     @map("created_by")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  lesson  Lesson?            @relation(fields: [lessonId], references: [id])
-  details AttendanceDetail[]
-
-  @@map("attendance")
-}
-
-model AttendanceDetail {
-  id           Int              @id @default(autoincrement())
-  attendanceId Int              @map("attendance_id")
-  studentId    Int              @map("student_id")
-  status       AttendanceStatus
-  comment      String?
-
-  attendance Attendance @relation(fields: [attendanceId], references: [id])
-  student    Student    @relation(fields: [studentId], references: [id])
-
-  @@unique([attendanceId, studentId])
-  @@map("attendance_details")
-}
-
-model Payment {
-  id            Int            @id @default(autoincrement())
-  studentId     Int?           @map("student_id")
-  groupId       Int?           @map("group_id")
-  amount        Int
-  paymentDate   DateTime       @default(now()) @map("payment_date")
-  paymentMethod PaymentMethod? @map("payment_method")
-  description   String?
-  receiptNumber String?        @map("receipt_number")
-  createdBy     Int?           @map("created_by")
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-
-  student Student? @relation(fields: [studentId], references: [id])
-  group   Group?   @relation(fields: [groupId], references: [id])
-  creator Staff?   @relation(fields: [createdBy], references: [id])
-
-  @@map("payments")
-}
-
-model Schedule {
   id         Int      @id @default(autoincrement())
-  groupId    Int?     @map("group_id")
-  day        WeekDay
-  startTime  DateTime @map("start_time")
-  endTime    DateTime @map("end_time")
-  roomNumber String?  @map("room_number")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  student_id Int
+  group_id   Int
+  status     Status   @default(active)
+  created_at DateTime @default(now())
+  update_at  DateTime @default(now())
 
-  group Group? @relation(fields: [groupId], references: [id])
-
-  @@unique([groupId, day, startTime])
-  @@map("schedule")
+  students Student @relation(fields: [student_id], references: [id])
+  groups   Group   @relation(fields: [group_id], references: [id])
 }

@@ -8,6 +8,7 @@ async function bootstrap() {
   app.setGlobalPrefix("app/v1")
   const config = new DocumentBuilder()
     .setTitle("CRM N26 group")
+    .addBearerAuth()
     .build()
 
   const documentFactory = () => SwaggerModule.createDocument(app, config)
