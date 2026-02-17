@@ -1,6 +1,6 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/core/databases/prisma.service';
-import { RegisterDto } from './dto/register.dto';
+import { RegisterDto, UpdateUserDto } from './dto/register.dto';
 import { hashPassword } from 'src/core/utils/bcrypt';
 import { Role, Status } from '@prisma/client';
 
@@ -8,7 +8,7 @@ import { Role, Status } from '@prisma/client';
 export class UsersService {
     constructor(private prisma: PrismaService) { }
 
-    async createAdmin(payload: RegisterDto) {
+    async createAdmin(payload: RegisterDto, filename: string) {
         const adminExists = await this.prisma.user.findFirst({
             where: {
                 OR: [
@@ -23,6 +23,7 @@ export class UsersService {
             data: {
                 ...payload,
                 password: hashPass,
+                photo: filename,
                 role: Role.ADMIN
             }
         })
@@ -56,6 +57,57 @@ export class UsersService {
         return {
             success: true,
             data: admins
+        }
+    }
+
+
+
+    async getOneAdmin(id: number) {
+        const admin = await this.prisma.user.findUnique({ where: { id } })
+        if (!admin) {
+            throw new NotFoundException()
+        }
+
+        return {
+            success: true,
+            data: admin
+        }
+    }
+
+
+    async updateAdmin(id: number, payload: UpdateUserDto, filename: string) {
+        const { password, ...rest } = payload
+        const existAdmin = await this.prisma.user.findUnique({ where: { id } })
+        if (!existAdmin) {
+            throw new NotFoundException()
+        }
+
+        await this.prisma.user.update({
+            where: { id }, data: {
+                ...rest,
+                ...(password && { password: await hashPassword(password) }),
+                ...(filename && { photo: filename })
+            }
+        })
+
+
+        return {
+            success: true,
+            message: "Admin updated"
+        }
+    }
+
+
+    async deleteAdmin(id: number) {
+        const existAdmin = await this.prisma.user.findUnique({ where: { id } })
+        if (!existAdmin) throw new NotFoundException()
+
+
+        await this.prisma.user.update({ where: { id }, data: { status: Status.inactive } })
+
+        return {
+            success: true,
+            message: "Admin inactivated"
         }
     }
 }
