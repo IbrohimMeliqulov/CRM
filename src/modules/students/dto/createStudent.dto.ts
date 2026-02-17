@@ -1,8 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Role } from "@prisma/client";
-import { IsEmail, IsEnum, IsMobilePhone, IsString, IsStrongPassword } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger"
+import { IsDateString, IsEmail, IsString } from "class-validator"
 
-export class RegisterDto {
+export class CreateStudent {
+
     @ApiProperty()
     @IsString()
     first_name: string
@@ -11,22 +11,33 @@ export class RegisterDto {
     @IsString()
     last_name: string
 
-    @IsEnum(Role)
-    role: Role
+
 
     @ApiProperty()
-    @IsStrongPassword()
+    @IsString()
     password: string
 
+
+
     @ApiProperty()
-    @IsMobilePhone("uz-UZ")
+    @IsString()
     phone: string
+
 
     @ApiProperty()
     @IsEmail()
     email: string
 
+
+    @ApiProperty()
+    @IsDateString()
+    birth_date: string
+
+
+
     @ApiProperty()
     @IsString()
     address: string
+
+
 }

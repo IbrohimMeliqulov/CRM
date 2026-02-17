@@ -12,7 +12,7 @@ export class AuthService {
 
 
     async login(payload: LoginDto) {
-        const existAdmin = await this.prisma.staff.findUnique({ where: { phone: payload.phone } })
+        const existAdmin = await this.prisma.user.findUnique({ where: { phone: payload.phone } })
 
         if (!existAdmin) {
             throw new BadRequestException("Phone number wrong")
