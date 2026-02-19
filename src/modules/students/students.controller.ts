@@ -41,7 +41,7 @@ export class StudentsController {
     })
     @UseInterceptors(FileInterceptor("photo", {
         storage: diskStorage({
-            destination: "./src/uplaods",
+            destination: "./src/uploads",
             filename: (req, file, cb) => {
                 const filename = new Date() + "." + file.mimetype.split("/")[1]
                 cb(null, filename)
@@ -60,9 +60,9 @@ export class StudentsController {
     @Post()
     createStudent(
         @Body() payload: CreateStudent,
-        @UploadedFile() file: Express.Multer.File
+        @UploadedFile() file?: Express.Multer.File
     ) {
-        return this.studentService.createStudent(payload, file.filename)
+        return this.studentService.createStudent(payload, file?.filename)
     }
 
 
@@ -77,7 +77,7 @@ export class StudentsController {
     @Roles(Role.SUPERADMIN, Role.ADMIN)
     @Get()
     getAllStudents() {
-        this.studentService.getAllStudents()
+        return this.studentService.getAllStudents()
     }
 
 
@@ -92,7 +92,7 @@ export class StudentsController {
     })
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
-    @Get(":id")
+    @Get("one/:id")
     getOneStudent(
         @Param("id", ParseIntPipe) id: number
     ) {
@@ -100,6 +100,16 @@ export class StudentsController {
     }
 
 
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN},${Role.ADMIN}`,
+        description: "Bu urlga superadminni va adminni huquqi bor"
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.SUPERADMIN, Role.ADMIN)
+    @Get("inactive")
+    getInactiveStudents() {
+        return this.studentService.getInactiveStudents()
+    }
 
 
 
@@ -128,7 +138,7 @@ export class StudentsController {
     })
     @UseInterceptors(FileInterceptor("photo", {
         storage: diskStorage({
-            destination: "./src/uplaods",
+            destination: "./src/uploads",
             filename: (req, file, cb) => {
                 const filename = new Date() + "." + file.mimetype.split("/")[1]
                 cb(null, filename)
@@ -147,10 +157,10 @@ export class StudentsController {
     updateStudent(
         @Param("id", ParseIntPipe) id: number,
         @Body() payload: UpdateStudent,
-        @UploadedFile() file: Express.Multer.File
+        @UploadedFile() file?: Express.Multer.File
 
     ) {
-        return this.studentService.updateStudent(id, payload, file.filename)
+        return this.studentService.updateStudent(id, payload, file?.filename)
     }
 
 

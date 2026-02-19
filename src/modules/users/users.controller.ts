@@ -37,9 +37,9 @@ export class UsersController {
             }
         }
     })
-    @UseInterceptors(FileInterceptor("photo ", {
+    @UseInterceptors(FileInterceptor("photo", {
         storage: diskStorage({
-            destination: "./src/uplaods",
+            destination: "./src/uploads",
             filename: (req, file, cb) => {
                 const filename = new Date() + "." + file.mimetype.split("/")[1]
                 cb(null, filename)
@@ -57,8 +57,8 @@ export class UsersController {
     }))
     @Post("createAdmin")
     createAdmin(@Body() payload: RegisterDto,
-        @UploadedFile() file: Express.Multer.File) {
-        return this.userService.createAdmin(payload, file.filename)
+        @UploadedFile() file?: Express.Multer.File) {
+        return this.userService.createAdmin(payload, file?.filename)
     }
 
 
@@ -73,6 +73,16 @@ export class UsersController {
         return this.userService.getAllAdmins()
     }
 
+
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN}`
+    })
+    @UseGuards(AuthGuard)
+    @Roles(Role.SUPERADMIN)
+    @Get("inactive")
+    getInactiveAdmins() {
+        return this.userService.getInactiveAdmins()
+    }
 
 
     @ApiOperation({
@@ -108,9 +118,9 @@ export class UsersController {
             }
         }
     })
-    @UseInterceptors(FileInterceptor("photo ", {
+    @UseInterceptors(FileInterceptor("photo", {
         storage: diskStorage({
-            destination: "./src/uplaods",
+            destination: "./src/uploads",
             filename: (req, file, cb) => {
                 const filename = new Date() + "." + file.mimetype.split("/")[1]
                 cb(null, filename)
@@ -130,9 +140,9 @@ export class UsersController {
     updateAdmin(
         @Body() payload: UpdateUserDto,
         @Param("id", ParseIntPipe) id: number,
-        @UploadedFile() file: Express.Multer.File
+        @UploadedFile() file?: Express.Multer.File
     ) {
-        return this.userService.updateAdmin(id, payload, file.filename)
+        return this.userService.updateAdmin(id, payload, file?.filename)
     }
 
 

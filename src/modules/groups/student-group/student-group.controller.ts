@@ -1,18 +1,31 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
-import { CoursesService } from './courses.service';
+import { StudentGroupService } from './student-group.service';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { AuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/role.decorator';
-import { CreateCourseDto, UpdateCourseDto } from './dto/create.course.dto';
+import { createStudentGroupDto, UpdateStudentGroupDto } from '../dto/create.groups.dto';
 
 
 
 @ApiBearerAuth()
-@Controller('courses')
-export class CoursesController {
-    constructor(private readonly courseService: CoursesService) { }
+@Controller('student-group')
+export class StudentGroupController {
+    constructor(private readonly studentGroupService: StudentGroupService) { }
+
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN},${Role.ADMIN}`
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.SUPERADMIN)
+    @Post()
+    createStudentGroup(
+        @Body() payload: createStudentGroupDto
+    ) {
+        return this.studentGroupService.createStudentGroup(payload)
+    }
+
 
 
     @ApiOperation({
@@ -20,22 +33,10 @@ export class CoursesController {
     })
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN)
-    @Get()
-    getAllCourses() {
-        return this.courseService.getAllCourses()
+    @Get("all")
+    getAllStudentGroups() {
+        return this.studentGroupService.getAllStudentGroups()
     }
-
-
-    @ApiOperation({
-        summary: `${Role.SUPERADMIN},${Role.ADMIN}`
-    })
-    @UseGuards(AuthGuard, RoleGuard)
-    @Roles(Role.SUPERADMIN)
-    @Get("inactive")
-    getInactiveCourses() {
-        return this.courseService.getInactiveCourses()
-    }
-
 
 
     @ApiOperation({
@@ -44,22 +45,21 @@ export class CoursesController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN)
     @Get(":id")
-    getOneCourse(@Param("id", ParseIntPipe) id: number) {
-        return this.courseService.getOneCourse(id)
+    getOneStudentGroup(
+        @Param("id", ParseIntPipe) id: number
+    ) {
+        return this.studentGroupService.getOneStudentGroup(id)
     }
-
 
 
     @ApiOperation({
         summary: `${Role.SUPERADMIN},${Role.ADMIN}`
     })
     @UseGuards(AuthGuard, RoleGuard)
-    @Roles(Role.SUPERADMIN)
-    @Post()
-    createCourse(
-        @Body() payload: CreateCourseDto
-    ) {
-        return this.courseService.createCourse(payload)
+    @Roles(Role.SUPERADMIN, Role.ADMIN)
+    @Get("inactive")
+    getInactiveStudentGroups() {
+        return this.studentGroupService.getInactiveStudentGroups()
     }
 
 
@@ -71,12 +71,12 @@ export class CoursesController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN)
     @Put(":id")
-    updateCourse(@Body() payload: UpdateCourseDto,
-        @Param("id", ParseIntPipe) id: number) {
-        return this.courseService.updateCourse(id, payload)
+    updateStudentGroup(
+        @Body() payload: UpdateStudentGroupDto,
+        @Param("id", ParseIntPipe) id: number
+    ) {
+        return this.studentGroupService.updateStudentGroup(id, payload)
     }
-
-
 
 
     @ApiOperation({
@@ -85,8 +85,9 @@ export class CoursesController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN)
     @Delete(":id")
-    deleteCourse(@Param("id", ParseIntPipe) id: number) {
-        return this.courseService.deleteCourse(id)
+    deleteStudentGroup(
+        @Param("id", ParseIntPipe) id: number
+    ) {
+        return this.studentGroupService.deleteStudentGroup(id)
     }
-
 }

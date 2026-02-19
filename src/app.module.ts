@@ -9,6 +9,7 @@ import { GroupsModule } from './modules/groups/groups.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path'
+import { RoomsModule } from './modules/rooms/rooms.module';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { join } from 'path'
       global: true,
       signOptions: { expiresIn: "12h" },
       secret: "shaftoli"
-    }), AuthModule, UsersModule, StudentsModule, TeachersModule, CoursesModule, GroupsModule],
+    }), AuthModule, UsersModule, StudentsModule, TeachersModule, CoursesModule, GroupsModule, RoomsModule],
   controllers: [],
   providers: [],
 })
