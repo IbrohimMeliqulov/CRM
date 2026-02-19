@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Status } from '@prisma/client';
 import { PrismaService } from 'src/core/databases/prisma.service';
 import { CreateTeacherDto, UpdateTeacherDto } from './dto/createTeacher.dto';
@@ -48,6 +48,71 @@ export class TeachersService {
         return {
             success: true,
             data: teacher
+        }
+    }
+
+    async teacherGroups(req) {
+        const { id } = req.user
+        console.log(id)
+        const teacherGroups = await this.prisma.group.findMany({
+            where: {
+                teacher_id: id,
+                status: Status.active
+            }
+        })
+
+        return {
+            success: true,
+            data: teacherGroups
+        }
+    }
+
+    async getAllInactiveTeachers() {
+        const teachers = await this.prisma.teacher.findMany({
+            where: { status: Status.inactive }
+        })
+
+        return {
+            success: true,
+            data: teachers
+        }
+    }
+
+    async singleGroup(groupId: number, req: any) {
+        const { id } = req.user
+        const existGroup = await this.prisma.group.findUnique({
+            where: {
+                id: groupId,
+                status: Status.active,
+                teacher_id: id
+            },
+
+        })
+
+        if (!existGroup) {
+            throw new NotFoundException()
+        }
+
+        const singleGroupStudents = await this.prisma.studentGroup.findMany({
+            where: { group_id: id },
+            select: {
+                id: true,
+                students: {
+                    select: {
+                        id: true,
+                        first_name: true,
+                        last_name: true,
+                        phone: true,
+                        birth_date: true,
+                        email: true
+                    }
+                }
+            }
+        })
+
+        return {
+            success: true,
+            data: singleGroupStudents
         }
     }
 

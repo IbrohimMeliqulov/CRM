@@ -8,7 +8,7 @@ import { Role, Status } from '@prisma/client';
 export class UsersService {
     constructor(private prisma: PrismaService) { }
 
-    async createAdmin(payload: RegisterDto, filename: string) {
+    async createAdmin(payload: RegisterDto, filename?: string) {
         const adminExists = await this.prisma.user.findFirst({
             where: {
                 OR: [
@@ -74,8 +74,18 @@ export class UsersService {
         }
     }
 
+    async getInactiveAdmins() {
+        const admins = await this.prisma.user.findMany({
+            where: { status: Status.inactive }
+        })
 
-    async updateAdmin(id: number, payload: UpdateUserDto, filename: string) {
+        return {
+            success: true,
+            data: admins
+        }
+    }
+
+    async updateAdmin(id: number, payload: UpdateUserDto, filename?: string) {
         const { password, ...rest } = payload
         const existAdmin = await this.prisma.user.findUnique({ where: { id } })
         if (!existAdmin) {

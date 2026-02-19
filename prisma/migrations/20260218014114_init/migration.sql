@@ -1,119 +1,20 @@
-/*
-  Warnings:
+-- CreateEnum
+CREATE TYPE "CourseLevel" AS ENUM ('beginner', 'intermediate', 'advanced');
 
-  - The values [Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday] on the enum `WeekDay` will be removed. If these variants are still used in the database, this will fail.
-  - You are about to drop the `attendance` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `attendance_details` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `courses` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `groups` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `lessons` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `payments` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `schedule` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `staffs` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `student_groups` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `students` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('SUPERADMIN', 'ADMIN', 'TEACHER', 'STUDENT');
 
 -- CreateEnum
+CREATE TYPE "StudentStatus" AS ENUM ('active', 'inactive', 'freeze', 'graduated');
+
+-- CreateEnum
+CREATE TYPE "WeekDay" AS ENUM ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY');
+
+-- CreateEnum
 CREATE TYPE "Status" AS ENUM ('active', 'inactive', 'freeze');
 
--- AlterEnum
-ALTER TYPE "StudentStatus" ADD VALUE 'freeze';
-
--- AlterEnum
-BEGIN;
-CREATE TYPE "WeekDay_new" AS ENUM ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY');
-ALTER TYPE "WeekDay" RENAME TO "WeekDay_old";
-ALTER TYPE "WeekDay_new" RENAME TO "WeekDay";
-DROP TYPE "public"."WeekDay_old";
-COMMIT;
-
--- DropForeignKey
-ALTER TABLE "attendance" DROP CONSTRAINT "attendance_lesson_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "attendance_details" DROP CONSTRAINT "attendance_details_attendance_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "attendance_details" DROP CONSTRAINT "attendance_details_student_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "groups" DROP CONSTRAINT "groups_course_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "groups" DROP CONSTRAINT "groups_teacher_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "lessons" DROP CONSTRAINT "lessons_created_by_fkey";
-
--- DropForeignKey
-ALTER TABLE "lessons" DROP CONSTRAINT "lessons_group_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "payments" DROP CONSTRAINT "payments_created_by_fkey";
-
--- DropForeignKey
-ALTER TABLE "payments" DROP CONSTRAINT "payments_group_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "payments" DROP CONSTRAINT "payments_student_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "schedule" DROP CONSTRAINT "schedule_group_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "student_groups" DROP CONSTRAINT "student_groups_group_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "student_groups" DROP CONSTRAINT "student_groups_student_id_fkey";
-
--- DropTable
-DROP TABLE "attendance";
-
--- DropTable
-DROP TABLE "attendance_details";
-
--- DropTable
-DROP TABLE "courses";
-
--- DropTable
-DROP TABLE "groups";
-
--- DropTable
-DROP TABLE "lessons";
-
--- DropTable
-DROP TABLE "payments";
-
--- DropTable
-DROP TABLE "schedule";
-
--- DropTable
-DROP TABLE "staffs";
-
--- DropTable
-DROP TABLE "student_groups";
-
--- DropTable
-DROP TABLE "students";
-
--- DropEnum
-DROP TYPE "AttendanceStatus";
-
--- DropEnum
-DROP TYPE "PaymentMethod";
-
--- DropEnum
-DROP TYPE "StaffRole";
-
--- DropEnum
-DROP TYPE "StaffStatus";
-
--- DropEnum
-DROP TYPE "StudentGroupStatus";
+-- CreateEnum
+CREATE TYPE "GroupStatus" AS ENUM ('planned', 'active', 'completed');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -188,6 +89,7 @@ CREATE TABLE "Course" (
 CREATE TABLE "Room" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
+    "status" "Status" NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

@@ -10,16 +10,19 @@ async function bootstrap() {
     .setTitle("CRM N26 group")
     .addBearerAuth()
     .build()
-
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    transform: true,
+    transformOptions: {
+      enableImplicitConversion: true
+    }
+  }))
   const documentFactory = () => SwaggerModule.createDocument(app, config)
   SwaggerModule.setup("swagger", app, documentFactory, {
     swaggerOptions: {
       persistAuthorization: true
     }
   })
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true
-  }))
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

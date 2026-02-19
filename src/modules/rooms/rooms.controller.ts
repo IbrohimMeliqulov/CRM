@@ -1,18 +1,19 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
-import { CoursesService } from './courses.service';
+import { RoomsService } from './rooms.service';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { AuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/role.decorator';
-import { CreateCourseDto, UpdateCourseDto } from './dto/create.course.dto';
+import { CreateRoomDto, UpdateRoomDto } from './dto/create.room.dto';
 
 
 
 @ApiBearerAuth()
-@Controller('courses')
-export class CoursesController {
-    constructor(private readonly courseService: CoursesService) { }
+@Controller('rooms')
+export class RoomsController {
+    constructor(private readonly roomsService: RoomsService) { }
+
 
 
     @ApiOperation({
@@ -21,20 +22,11 @@ export class CoursesController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN)
     @Get()
-    getAllCourses() {
-        return this.courseService.getAllCourses()
+    getAllRooms() {
+        return this.roomsService.getAllRooms()
     }
 
 
-    @ApiOperation({
-        summary: `${Role.SUPERADMIN},${Role.ADMIN}`
-    })
-    @UseGuards(AuthGuard, RoleGuard)
-    @Roles(Role.SUPERADMIN)
-    @Get("inactive")
-    getInactiveCourses() {
-        return this.courseService.getInactiveCourses()
-    }
 
 
 
@@ -44,10 +36,20 @@ export class CoursesController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN)
     @Get(":id")
-    getOneCourse(@Param("id", ParseIntPipe) id: number) {
-        return this.courseService.getOneCourse(id)
+    getOneRoom(@Param("id", ParseIntPipe) id: number) {
+        return this.roomsService.getOneRoom(id)
     }
 
+
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN},${Role.ADMIN}`
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.SUPERADMIN)
+    @Get("inactive")
+    getInactiveRooms() {
+        return this.roomsService.getInactiveRooms()
+    }
 
 
     @ApiOperation({
@@ -56,10 +58,10 @@ export class CoursesController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN)
     @Post()
-    createCourse(
-        @Body() payload: CreateCourseDto
+    createRoom(
+        @Body() payload: CreateRoomDto
     ) {
-        return this.courseService.createCourse(payload)
+        return this.roomsService.createRoom(payload)
     }
 
 
@@ -71,9 +73,9 @@ export class CoursesController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN)
     @Put(":id")
-    updateCourse(@Body() payload: UpdateCourseDto,
+    updateRoom(@Body() payload: UpdateRoomDto,
         @Param("id", ParseIntPipe) id: number) {
-        return this.courseService.updateCourse(id, payload)
+        return this.roomsService.updateRoom(id, payload)
     }
 
 
@@ -85,8 +87,8 @@ export class CoursesController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN)
     @Delete(":id")
-    deleteCourse(@Param("id", ParseIntPipe) id: number) {
-        return this.courseService.deleteCourse(id)
+    deleteRoom(@Param("id", ParseIntPipe) id: number) {
+        return this.roomsService.deleteRoom(id)
     }
 
 }

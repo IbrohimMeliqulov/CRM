@@ -3,12 +3,16 @@ import { PrismaService } from 'src/core/databases/prisma.service';
 import { CreateStudent, UpdateStudent } from './dto/createStudent.dto';
 import { hashPassword } from 'src/core/utils/bcrypt';
 import { Status } from '@prisma/client';
+import { EmailService } from 'src/common/email/email.service';
 
 
 
 @Injectable()
 export class StudentsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private emailService: EmailService
+    ) { }
 
 
 
@@ -30,7 +34,6 @@ export class StudentsService {
             }
         })
 
-
         return {
             success: true,
             data: students
@@ -38,7 +41,7 @@ export class StudentsService {
     }
 
 
-    async createStudent(payload: CreateStudent, filename: string) {
+    async createStudent(payload: CreateStudent, filename?: string) {
 
         const existStudent = await this.prisma.student.findFirst({
             where: {
@@ -48,6 +51,9 @@ export class StudentsService {
                 ]
             }
         })
+
+
+        await this.emailService.sendEmail(payload.email, payload.phone, payload.password)
 
 
         if (existStudent) {
@@ -72,6 +78,24 @@ export class StudentsService {
         }
     }
 
+    async getInactiveStudents() {
+        const inactiveStudents = await this.prisma.student.findMany({
+            where: { status: Status.inactive },
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                birth_date: true,
+                phone: true,
+                email: true
+            }
+        })
+
+        return {
+            success: true,
+            data: inactiveStudents
+        }
+    }
 
     async getOneStudent(id: number) {
         const student = await this.prisma.student.findUnique({
@@ -90,7 +114,7 @@ export class StudentsService {
 
 
 
-    async updateStudent(id: number, payload: UpdateStudent, filename: string) {
+    async updateStudent(id: number, payload: UpdateStudent, filename?: string) {
         const { password, ...rest } = payload
         await this.prisma.student.update({
             where: { id: id }, data: {

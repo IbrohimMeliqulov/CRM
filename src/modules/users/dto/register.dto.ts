@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Role } from "@prisma/client";
-import { IsEmail, IsEnum, IsMobilePhone, IsOptional, IsString, IsStrongPassword } from "class-validator";
+import { Transform } from "class-transformer";
+import { IsEmail, IsEnum, IsMobilePhone, IsOptional, IsString, IsStrongPassword, ValidateIf } from "class-validator";
 
 export class RegisterDto {
     @ApiProperty()
@@ -26,39 +27,44 @@ export class RegisterDto {
     @ApiProperty()
     @IsString()
     address: string
+
+
+    @ApiProperty({ type: "string", format: "binary", required: false })
+    @IsOptional()
+    photo?: any;
+
 }
 
 
 
 export class UpdateUserDto {
     @ApiProperty()
-    @IsOptional()
+    @ValidateIf(o => o.first_name !== undefined && o.first_name !== '')
     @IsString()
     first_name: string
 
     @ApiProperty()
-    @IsOptional()
+    @ValidateIf(o => o.last_name !== undefined && o.last_name !== '')
     @IsString()
     last_name: string
 
-
     @ApiProperty()
-    @IsOptional()
+    @ValidateIf(o => o.password !== undefined && o.password !== '')
     @IsStrongPassword()
     password: string
 
     @ApiProperty()
-    @IsOptional()
+    @ValidateIf(o => o.phone !== undefined && o.phone !== '')
     @IsMobilePhone("uz-UZ")
     phone: string
 
     @ApiProperty()
-    @IsOptional()
+    @ValidateIf(o => o.email !== undefined && o.email !== '')
     @IsEmail()
     email: string
 
     @ApiProperty()
-    @IsOptional()
+    @ValidateIf(o => o.address !== undefined && o.address !== '')
     @IsString()
     address: string
 }

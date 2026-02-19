@@ -1,12 +1,12 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { TeachersService } from './teachers.service';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
-import { Role } from '@prisma/client';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/role.decorator';
+import { Role } from '@prisma/client';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { TeachersService } from './teachers.service';
 import { CreateTeacherDto, UpdateTeacherDto } from './dto/createTeacher.dto';
 
 
@@ -14,8 +14,7 @@ import { CreateTeacherDto, UpdateTeacherDto } from './dto/createTeacher.dto';
 @ApiBearerAuth()
 @Controller('teachers')
 export class TeachersController {
-    constructor(private teacherService: TeachersService) { }
-
+    constructor(private readonly teacherService: TeachersService) { }
 
 
     @ApiOperation({
@@ -39,16 +38,16 @@ export class TeachersController {
             }
         }
     })
-    @UseInterceptors(FileInterceptor("photo ", {
+    @UseInterceptors(FileInterceptor("photo", {
         storage: diskStorage({
-            destination: "./src/uplaods",
+            destination: "./src/uploads",
             filename: (req, file, cb) => {
                 const filename = new Date() + "." + file.mimetype.split("/")[1]
                 cb(null, filename)
             }
         }),
         fileFilter: (req, file, cb) => {
-            const existFile = ["png", "jpg", "jpeg"]
+            const existFile = ["png", "jpeg", "jpg"]
 
             if (!existFile.includes(file.mimetype.split("/")[1])) {
                 cb(new UnsupportedMediaTypeException(), false)
@@ -58,12 +57,13 @@ export class TeachersController {
         }
     }))
     @Post()
-    createStudent(
+    createTeacher(
         @Body() payload: CreateTeacherDto,
         @UploadedFile() file: Express.Multer.File
     ) {
-        return this.teacherService.createTeacher(payload, file.filename)
+        return this.teacherService.createTeacher(payload, file?.filename)
     }
+
 
 
 
@@ -76,7 +76,44 @@ export class TeachersController {
     @Roles(Role.SUPERADMIN, Role.ADMIN)
     @Get()
     getAllTeachers() {
-        this.teacherService.getAllTeachers()
+        return this.teacherService.getAllTeachers()
+    }
+
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN},${Role.ADMIN}`,
+        description: "Bu urlga superadminni va adminni huquqi bor"
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.SUPERADMIN, Role.ADMIN)
+    @Get("inactive")
+    getAllInactiveTeachers() {
+        return this.teacherService.getAllInactiveTeachers()
+    }
+
+
+    @ApiOperation({
+        summary: `${Role.TEACHER}`,
+        description: "Bu urlga teacherni huquqi bor"
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.TEACHER)
+    @Get("groups")
+    teacherGroups(@Req() req: Request) {
+        return this.teacherService.teacherGroups(req)
+    }
+
+
+    @ApiOperation({
+        summary: `${Role.TEACHER}`,
+        description: "Bu urlga teacherni huquqi bor"
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.TEACHER)
+    @Get("single/:groupId")
+    singleGroup(
+        @Req() req: Request,
+        @Param("groupId", ParseIntPipe) groupId: number) {
+        return this.teacherService.singleGroup(groupId, req)
     }
 
 
@@ -88,15 +125,11 @@ export class TeachersController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
     @Get(":id")
-    getOneStudent(
+    getOneTeacher(
         @Param("id", ParseIntPipe) id: number
     ) {
-        this.teacherService.getOneTeacher(id)
+        return this.teacherService.getOneTeacher(id)
     }
-
-
-
-
 
 
 
@@ -108,6 +141,7 @@ export class TeachersController {
     })
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
+    @Put(":id")
     @ApiConsumes("multipart/form-data")
     @ApiBody({
         schema: {
@@ -123,31 +157,32 @@ export class TeachersController {
             }
         }
     })
-    @UseInterceptors(FileInterceptor("photo ", {
+    @UseInterceptors(FileInterceptor("photo", {
         storage: diskStorage({
-            destination: "./src/uplaods",
+            destination: "./src/uploads",
             filename: (req, file, cb) => {
                 const filename = new Date() + "." + file.mimetype.split("/")[1]
                 cb(null, filename)
             }
         }),
         fileFilter: (req, file, cb) => {
-            const existFile = ["png", "jpg", "jpeg"]
+            const existFile = ["png", "jpeg", "jpg"]
 
             if (!existFile.includes(file.mimetype.split("/")[1])) {
                 cb(new UnsupportedMediaTypeException(), false)
             }
+
             cb(null, true)
         }
     }))
-    @Put(":id")
-    updateTeacher(@Body() payload: UpdateTeacherDto,
+    updateTeacher(
         @Param("id", ParseIntPipe) id: number,
+        @Body() payload: UpdateTeacherDto,
         @UploadedFile() file: Express.Multer.File
+
     ) {
         return this.teacherService.updateTeacher(id, payload, file.filename)
     }
-
 
 
 
@@ -159,7 +194,10 @@ export class TeachersController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
     @Delete(":id")
-    deleteTeacher(@Param("id", ParseIntPipe) id: number) {
+    deleteTeacher(
+        @Param("id", ParseIntPipe) id: number
+    ) {
         return this.teacherService.deleteTeacher(id)
     }
+
 }
