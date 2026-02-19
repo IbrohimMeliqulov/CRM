@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/core/databases/prisma.service';
 import { CreateRoomDto, UpdateRoomDto } from './dto/create.room.dto';
 import { Status } from '@prisma/client';
@@ -71,7 +71,7 @@ export class RoomsService {
 
     async updateRoom(id: number, payload: UpdateRoomDto) {
         const existRoom = await this.prisma.room.findUnique({ where: { id } })
-        if (!existRoom) throw new BadRequestException()
+        if (!existRoom) throw new NotFoundException()
 
 
         await this.prisma.room.update({ where: { id }, data: payload })
@@ -81,7 +81,7 @@ export class RoomsService {
 
     async deleteRoom(id: number) {
         const existRoom = await this.prisma.room.findUnique({ where: { id } })
-        if (!existRoom) throw new BadRequestException()
+        if (!existRoom) throw new NotFoundException()
 
         await this.prisma.room.update({ where: { id }, data: { status: Status.inactive } })
 

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/core/databases/prisma.service';
 import { CreateStudent, UpdateStudent } from './dto/createStudent.dto';
 import { hashPassword } from 'src/core/utils/bcrypt';
@@ -115,6 +115,8 @@ export class StudentsService {
 
 
     async updateStudent(id: number, payload: UpdateStudent, filename?: string) {
+        const existStudent = await this.prisma.student.findUnique({ where: { id } })
+        if (!existStudent) throw new NotFoundException()
         const { password, ...rest } = payload
         await this.prisma.student.update({
             where: { id: id }, data: {
@@ -132,6 +134,8 @@ export class StudentsService {
 
 
     async deleteStudent(id: number) {
+        const existStudent = await this.prisma.student.findUnique({ where: { id } })
+        if (!existStudent) throw new NotFoundException()
         await this.prisma.student.update({ where: { id }, data: { status: Status.inactive } })
         return {
             success: true,
