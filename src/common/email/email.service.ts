@@ -10,9 +10,10 @@ export class EmailService {
             to: email,
             from: "ibrohim.meliqulov2003@gmail.com",
             subject: "CRM",
-            template: "index",
+            template: "index.hbs",
             context: {
-                text: `login:${login}\n\n password:${password}`
+                login,
+                password
             }
         })
     }

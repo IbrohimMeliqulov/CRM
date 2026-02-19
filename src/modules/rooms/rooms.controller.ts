@@ -28,6 +28,15 @@ export class RoomsController {
 
 
 
+    @ApiOperation({
+        summary: `${Role.SUPERADMIN},${Role.ADMIN}`
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.SUPERADMIN)
+    @Get("inactive")
+    getInactiveRooms() {
+        return this.roomsService.getInactiveRooms()
+    }
 
 
     @ApiOperation({
@@ -41,15 +50,6 @@ export class RoomsController {
     }
 
 
-    @ApiOperation({
-        summary: `${Role.SUPERADMIN},${Role.ADMIN}`
-    })
-    @UseGuards(AuthGuard, RoleGuard)
-    @Roles(Role.SUPERADMIN)
-    @Get("inactive")
-    getInactiveRooms() {
-        return this.roomsService.getInactiveRooms()
-    }
 
 
     @ApiOperation({

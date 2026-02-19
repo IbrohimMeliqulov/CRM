@@ -49,7 +49,17 @@ export class StudentGroupService {
 
     async getAllStudentGroups() {
         const studentGroups = await this.prisma.studentGroup.findMany({
-            where: { status: Status.active }
+            where:
+            {
+                status: Status.active
+            }, include: {
+                groups: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
+            }
         })
 
         return {
