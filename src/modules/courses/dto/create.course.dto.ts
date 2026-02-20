@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CourseLevel } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/client";
-import { IsDecimal, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsDecimal, IsEnum, IsNumber, IsOptional, IsString, ValidateIf } from "class-validator";
 
 export enum courseLevel {
     beginner = "beginner",
@@ -58,35 +58,35 @@ export class CreateCourseDto {
 
 export class UpdateCourseDto {
     @ApiProperty()
-    @IsOptional()
+    @ValidateIf(o => o.name !== undefined && o.name !== '')
     @IsString()
-    name: string
+    name?: string
 
 
     @ApiProperty()
-    @IsOptional()
+    @ValidateIf(o => o.description !== undefined && o.description !== '')
     @IsString()
-    description: string
+    description?: string
 
 
 
     @ApiProperty()
-    @IsOptional()
+    @ValidateIf(o => o.price !== undefined && o.price !== '')
     @IsNumber()
-    price: number
+    price?: number
 
 
 
     @ApiProperty()
-    @IsOptional()
+    @ValidateIf(o => o.duration_month !== undefined && o.duration_month !== '')
     @IsNumber()
-    duration_month: number
+    duration_month?: number
 
 
     @ApiProperty()
-    @IsOptional()
+    @ValidateIf(o => o.duration_hours !== undefined && o.duration_hours !== '')
     @IsNumber()
-    duration_hours: number
+    duration_hours?: number
 
 
     @ApiProperty({
@@ -94,7 +94,7 @@ export class UpdateCourseDto {
         enumName: 'CourseLevel',
         example: CourseLevel.beginner
     })
-    @IsOptional()
+    @ValidateIf(o => o.level !== undefined && o.level !== '')
     @IsEnum(CourseLevel)
-    level: CourseLevel
+    level?: CourseLevel
 }

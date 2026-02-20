@@ -41,30 +41,30 @@ export class UpdateUserDto {
     @ApiProperty()
     @ValidateIf(o => o.first_name !== undefined && o.first_name !== '')
     @IsString()
-    first_name: string
+    first_name?: string
 
     @ApiProperty()
     @ValidateIf(o => o.last_name !== undefined && o.last_name !== '')
     @IsString()
-    last_name: string
+    last_name?: string
 
     @ApiProperty()
     @ValidateIf(o => o.password !== undefined && o.password !== '')
     @IsStrongPassword()
-    password: string
+    password?: string
 
     @ApiProperty()
     @ValidateIf(o => o.phone !== undefined && o.phone !== '')
     @IsMobilePhone("uz-UZ")
-    phone: string
+    phone?: string
 
     @ApiProperty()
     @ValidateIf(o => o.email !== undefined && o.email !== '')
     @IsEmail()
-    email: string
+    email?: string
 
     @ApiProperty()
     @ValidateIf(o => o.address !== undefined && o.address !== '')
     @IsString()
-    address: string
+    address?: string
 }

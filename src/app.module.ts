@@ -10,6 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path'
 import { RoomsModule } from './modules/rooms/rooms.module';
+import { LessonsModule } from './modules/lessons/lessons.module';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { RoomsModule } from './modules/rooms/rooms.module';
       global: true,
       signOptions: { expiresIn: "12h" },
       secret: "shaftoli"
-    }), AuthModule, UsersModule, StudentsModule, TeachersModule, CoursesModule, GroupsModule, RoomsModule],
+    }), AuthModule, UsersModule, StudentsModule, TeachersModule, CoursesModule, GroupsModule, RoomsModule, LessonsModule],
   controllers: [],
   providers: [],
 })
