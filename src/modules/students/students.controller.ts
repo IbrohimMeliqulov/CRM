@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { AuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
@@ -15,6 +15,21 @@ import { diskStorage } from 'multer';
 @Controller('students')
 export class StudentsController {
     constructor(private readonly studentService: StudentsService) { }
+
+    @ApiOperation({
+        summary: `${Role.STUDENT}`,
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.STUDENT)
+    @Get("my/groups")
+    getMyGroups(
+        @Req() req: Request
+    ) {
+        return this.studentService.getMyGroups(req['user'])
+    }
+
+
+
 
 
     @ApiOperation({
