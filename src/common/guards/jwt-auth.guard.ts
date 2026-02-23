@@ -17,15 +17,13 @@ export class AuthGuard implements CanActivate {
 
             if (!token) throw new UnauthorizedException()
             token = token.split(" ")[1]
-
             let user = await this.jwtService.verify(token)
-
 
             req["user"] = user
 
             return true
         } catch (error) {
-            console.log(error.message)
+            console.log(error.message, error.stack)
             throw new UnauthorizedException()
 
         }

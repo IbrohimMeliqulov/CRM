@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { HomeworkService } from './homework.service';
-import { ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { CreateHomeworkDto, UpdateHomeworkDto } from './dto/create.dto';
@@ -9,6 +9,8 @@ import { AuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/role.decorator';
 
+
+@ApiBearerAuth()
 @Controller('homework')
 export class HomeworkController {
     constructor(private readonly homeworkService: HomeworkService) { }
@@ -29,7 +31,7 @@ export class HomeworkController {
         summary: `${Role.SUPERADMIN},${Role.ADMIN}`
     })
     @UseGuards(AuthGuard, RoleGuard)
-    @Roles(Role.SUPERADMIN, Role.ADMIN)
+    @Roles(Role.SUPERADMIN, Role.ADMIN, Role.TEACHER)
     @ApiConsumes("multipart/form-data")
     @ApiBody({
         schema: {
