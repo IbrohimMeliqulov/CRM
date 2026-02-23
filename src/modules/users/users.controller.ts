@@ -41,7 +41,7 @@ export class UsersController {
         storage: diskStorage({
             destination: "./src/uploads",
             filename: (req, file, cb) => {
-                const filename = new Date() + "." + file.mimetype.split("/")[1]
+                const filename = new Date().getTime() + "." + file.mimetype.split("/")[1]
                 cb(null, filename)
             }
         }),
@@ -122,7 +122,7 @@ export class UsersController {
         storage: diskStorage({
             destination: "./src/uploads",
             filename: (req, file, cb) => {
-                const filename = new Date() + "." + file.mimetype.split("/")[1]
+                const filename = new Date().getTime() + "." + file.mimetype.split("/")[1]
                 cb(null, filename)
             }
         }),

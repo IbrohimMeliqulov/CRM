@@ -46,7 +46,7 @@ export class HomeworkController {
         storage: diskStorage({
             destination: "./src/uploads/files",
             filename: (req, file, cb) => {
-                const filename = Date.now() + "." + file.mimetype.split("/")[1]
+                const filename = new Date().getTime() + "." + file.mimetype.split("/")[1]
                 cb(null, filename)
             }
         })
@@ -66,13 +66,35 @@ export class HomeworkController {
     })
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
+    @ApiConsumes("multipart/form-data")
+    @ApiBody({
+        schema: {
+            type: "object",
+            properties: {
+                lesson_id: { type: "number " },
+                group_id: { type: "number " },
+                file: { type: "string", format: "binary" },
+                title: { type: "string" }
+            }
+        }
+    })
+    @UseInterceptors(FileInterceptor("file", {
+        storage: diskStorage({
+            destination: "./src/uploads/files",
+            filename: (req, file, cb) => {
+                const filename = new Date().getTime() + "." + file.mimetype.split("/")[1]
+                cb(null, filename)
+            }
+        })
+    }))
     @Put(":id")
     udpateHomework(
         @Param("id", ParseIntPipe) id: number,
         @Body() payload: UpdateHomeworkDto,
-        @Req() req: Request
+        @Req() req: Request,
+        @UploadedFile() file?: Express.Multer.File
     ) {
-        return this.homeworkService.updateHomework(id, payload, req["user"])
+        return this.homeworkService.updateHomework(id, payload, req["user"], file?.filename)
     }
 
 
