@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/core/databases/prisma.service';
 import { CreateLessonDto, UpdateLessonDto } from './dto/create.lesson.dto';
 import { Role, Status } from '@prisma/client';
@@ -6,6 +6,45 @@ import { Role, Status } from '@prisma/client';
 @Injectable()
 export class LessonsService {
     constructor(private prisma: PrismaService) { }
+
+
+    async getMyGroupLessons(groupId: number, current_user: { id: number }) {
+        const existGroup = await this.prisma.group.findFirst({
+            where: { id: groupId, status: Status.active }
+        })
+        if (!existGroup) {
+            throw new NotFoundException("Group not found with this id")
+        }
+
+        const existGroupStudent = await this.prisma.studentGroup.findMany({
+            where: {
+                group_id: groupId,
+                student_id: current_user.id,
+                status: Status.active
+            }
+        })
+
+        if (!existGroupStudent) throw new BadRequestException("Group does not belong to this student")
+
+
+        const groupLessons = await this.prisma.lesson.findMany({
+            where: {
+                group_id: groupId,
+                status: Status.active
+            },
+            select: {
+                id: true,
+                topic: true,
+                created_at: true
+            }
+        })
+        return {
+            success: true,
+            data: groupLessons
+        }
+    }
+
+
 
 
 

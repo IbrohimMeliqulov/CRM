@@ -14,6 +14,22 @@ import { RoleGuard } from 'src/common/guards/role.guard';
 export class LessonsController {
     constructor(private readonly lessonService: LessonsService) { }
 
+    @ApiOperation({
+        summary: `${Role.STUDENT}`
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.STUDENT)
+    @Get("my/group/:groupId")
+    getMyGroupLessons(
+        @Param("groupId", ParseIntPipe) groupId: number,
+        @Req() req: Request
+    ) {
+        return this.lessonService.getMyGroupLessons(groupId, req["user"])
+    }
+
+
+
+
 
     @ApiOperation({
         summary: `${Role.ADMIN}`

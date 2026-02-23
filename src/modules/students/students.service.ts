@@ -16,6 +16,28 @@ export class StudentsService {
 
 
 
+    async getMyGroups(current_user: { id: number }) {
+        const myGroups = await this.prisma.studentGroup.findMany({
+            where: {
+                student_id: current_user.id
+            },
+            select: {
+                groups: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
+            }
+        })
+
+        return {
+            success: true,
+            data: myGroups.map(el => el.groups)
+        }
+    }
+
+
 
     async getAllStudents() {
         const students = await this.prisma.student.findMany({

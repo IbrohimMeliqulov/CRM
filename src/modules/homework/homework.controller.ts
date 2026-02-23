@@ -15,6 +15,25 @@ import { Roles } from 'src/common/decorators/role.decorator';
 export class HomeworkController {
     constructor(private readonly homeworkService: HomeworkService) { }
 
+
+    @ApiOperation({
+        summary: `${Role.STUDENT}`
+    })
+    @UseGuards(AuthGuard, RoleGuard)
+    @Roles(Role.STUDENT)
+    @Get("own/:lessonId")
+    getOwnHomework(
+        @Param("lessonId") lessonId: number,
+        @Req() req: Request
+    ) {
+        return this.homeworkService.getOwnHomework(lessonId, req["user"])
+    }
+
+
+
+
+
+
     @ApiOperation({
         summary: `${Role.SUPERADMIN},${Role.ADMIN}`
     })
@@ -28,7 +47,7 @@ export class HomeworkController {
 
 
     @ApiOperation({
-        summary: `${Role.SUPERADMIN},${Role.ADMIN}`
+        summary: `${Role.SUPERADMIN},${Role.ADMIN},${Role.TEACHER}`
     })
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN, Role.TEACHER)
@@ -64,10 +83,10 @@ export class HomeworkController {
 
 
     @ApiOperation({
-        summary: `${Role.SUPERADMIN},${Role.ADMIN}`
+        summary: `${Role.SUPERADMIN},${Role.ADMIN},${Role.TEACHER}`
     })
     @UseGuards(AuthGuard, RoleGuard)
-    @Roles(Role.SUPERADMIN, Role.ADMIN)
+    @Roles(Role.SUPERADMIN, Role.ADMIN, Role.TEACHER)
     @ApiConsumes("multipart/form-data")
     @ApiBody({
         schema: {
