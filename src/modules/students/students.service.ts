@@ -4,6 +4,7 @@ import { CreateStudent, UpdateStudent } from './dto/createStudent.dto';
 import { hashPassword } from 'src/core/utils/bcrypt';
 import { Status } from '@prisma/client';
 import { EmailService } from 'src/common/email/email.service';
+import { PaginationDto } from './dto/pagination.dto';
 
 
 
@@ -39,7 +40,8 @@ export class StudentsService {
 
 
 
-    async getAllStudents() {
+    async getAllStudents(pagination: PaginationDto) {
+        const { page, limit } = pagination
         const students = await this.prisma.student.findMany({
             where: {
                 status: Status.active
@@ -53,7 +55,9 @@ export class StudentsService {
                 email: true,
                 phone: true,
                 photo: true
-            }
+            },
+            skip: (limit ? limit : 10) * (page ? page - 1 : 0),
+            take: limit ? limit : 10
         })
 
         return {

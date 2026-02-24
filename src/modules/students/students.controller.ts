@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, Req, UnsupportedMediaTypeException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { AuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RoleGuard } from 'src/common/guards/role.guard';
@@ -8,6 +8,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagg
 import { CreateStudent, UpdateStudent } from './dto/createStudent.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { PaginationDto } from './dto/pagination.dto';
 
 
 
@@ -91,8 +92,10 @@ export class StudentsController {
     @UseGuards(AuthGuard, RoleGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
     @Get()
-    getAllStudents() {
-        return this.studentService.getAllStudents()
+    getAllStudents(
+        @Query() pagination: PaginationDto
+    ) {
+        return this.studentService.getAllStudents(pagination)
     }
 
 
