@@ -5,24 +5,24 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix("app/v1")
-  const config = new DocumentBuilder()
-    .setTitle("CRM N26 group")
-    .addBearerAuth()
-    .build()
+  app.setGlobalPrefix("app/v1");
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true,
-    transformOptions: {
-      enableImplicitConversion: true
-    }
-  }))
-  const documentFactory = () => SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup("swagger", app, documentFactory, {
-    swaggerOptions: {
-      persistAuthorization: true
-    }
-  })
-  await app.listen(process.env.PORT ?? 3001);
+    transformOptions: { enableImplicitConversion: true }
+  }));
+
+  const config = new DocumentBuilder()
+    .setTitle("CRM N26 group")
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup("swagger", app, document, {
+    swaggerOptions: { persistAuthorization: true }
+  });
+
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
