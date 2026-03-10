@@ -1,0 +1,31 @@
+# version: "3.9"
+
+services:
+  crm:
+    image: postgres:15
+    container_name: crm_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: crm_compose
+    ports:
+      - "5440:5432"
+    volumes:
+      - baza_data:/var/lib/postgresql/data
+      
+  app:
+    build: .
+    container_name: 26_app
+    restart: always
+    env_file: 
+      - .env
+    ports: 
+      - "4001:3000"
+    depends_on:
+      - crm
+    environment: 
+      DATABASE_URL: postgres://postgres:1234@crm:5432/crm_compose
+
+volumes:
+  baza_data:
